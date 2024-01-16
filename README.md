@@ -13,7 +13,7 @@ docker run -d \
      -e "PVPN_USERNAME=xxx" \
      -e "PVPN_PASSWORD=xxx" \
      -e "PVPN_TIER=3" \
-     -e "PPROXY_ARGS=-l http+socks4+socks5://0.0.0.0:7070 -v" \
+     -e "PPROXY_ARGS=-l http+socks4+socks5://:7070 -v" \
      -e "PVPN_ARGS=--cc jp" \
      -p 7070:7070 \
      retouch1ng/pproxy-protonvpn
@@ -31,6 +31,16 @@ Test:
 
 ```
 curl --proxy http://127.0.0.1:7070 https://ipinfo.io/ip
+```
+
+To expose the PProxy server outside, you can setup another pproxy like this (because by default only host can have access to the proxy):
+
+```sh
+docker run -p 9999:9999 \
+     mosajjal/pproxy:latest \
+     -l http+socks4+socks5://:9999#user:password
+     -r http+socks4+socks5://127.0.0.1:7070
+     -v
 ```
 
 ## Features
@@ -80,7 +90,7 @@ Default: `1`
 ### `PVPN_ARGS`
 
 Any arguments you want to pass to `protonvpn connect`. For example, if you want
-`protonvpn` to connect to a random server, set this to `"--random"`.
+`protonvpn` to connect to a random server, set this to `--random`.
 
 See the [`protonvpn` docs](https://github.com/ProtonVPN/linux-cli-community/blob/master/USAGE.md) for supported commands and arguments.
 
