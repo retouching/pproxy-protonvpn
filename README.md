@@ -43,12 +43,6 @@ containers, each setting up a different VPN connection _which doesn't affect
 your host's networking_. Routing traffic over a specific VPN connection is then
 as simple as configuring a target application's proxy server.
 
-### Share a VPN connection between devices on your LAN
-
-Run a container on one machine, and configure multiple devices on your network
-to connect to its proxy server. All connections that use that proxy server will
-be routed over the same VPN connection.
-
 ## Configuration
 
 You can set any of the following container environment variables with
@@ -71,6 +65,17 @@ list (from `protonvpn init`):
 2) Plus
 3) Visionary
 ```
+
+### `PVPN_KILLSWITCH`
+
+Enable or not the killswitch.
+
+```
+0) Disabled
+1) Enabled
+```
+
+Default: `1`
 
 ### `PVPN_ARGS`
 

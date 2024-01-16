@@ -29,6 +29,7 @@ def prepare_protonvpn_config():
             data = data.replace('PVPN_USERNAME', os.environ.get('PVPN_USERNAME'))
             data = data.replace('PVPN_TIER', os.environ.get('PVPN_TIER'))
             data = data.replace('PVPN_PROTOCOL', 'udp')
+            data = data.replace('PVPN_KILLSWITCH', os.environ.get('PVPN_KILLSWITCH') or '1')
     
             f.write(data)
 
