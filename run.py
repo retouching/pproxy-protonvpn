@@ -1,12 +1,13 @@
 import os
 import subprocess
+import re
 
 
 def prepare_tun_device():
     if not os.path.exists('/dev/net/tun'):
         if not os.path.exists('/dev/net'):
             os.mkdir('/dev/net')
-        subprocess.check_output(['mknod', '/dev/net/tun', 'c', '10', '200'])
+        os.mknod('/dev/net/tun', 0o755, os.makedev(10, 200))
     
     print('Tun device initialized!')
 
@@ -40,34 +41,50 @@ def prepare_protonvpn_config():
 
 
 def run_protonvpn():
+    start_params = None
+
     try:
         subprocess.check_output(['protonvpn', 'refresh'])
 
         args = ['protonvpn', 'connect']
 
-        if os.environ.get('PVPN_COUNTRY'):
-            args += ['--cc', os.environ.get('PVPN_COUNTRY')]
-        elif os.environ.get('PVPN_SERVER'):
-            args += [os.environ.get('PVPN_SERVER')]
+        if os.environ.get('PVPN_ARGS'):
+            start_params = [a for a in re.split(r' +', os.environ.get('PVPN_ARGS')) if a]
         else:
-            args += ['--fastest']
+            start_params = ['--fastest']
+
+        args += start_params
         
         subprocess.check_output(args)
         subprocess.check_output(['ip', 'link', 'show', 'proton0'])
     except (Exception,):
         raise RuntimeError('Failed to run ProtonVPN')
     
-    print('ProtonVPN started!')
+    print(f'ProtonVPN started! (using params: {" ".join(start_params)})')
 
 
 def run_pproxy():
-    if not os.environ.get('PPROXY_LISTEN'):
-        raise Exception('PPROXY_LISTEN environment variable must be set')
+    args = ['pproxy']
+    start_params = None
+
+    if os.environ.get('PPROXY_ARGS'):
+        start_params = [a for a in re.split(r' +', os.environ.get('PPROXY_ARGS')) if a]
+        args += start_params
     
-    try:
-        subprocess.check_output(['pproxy', '-l', os.environ.get('PPROXY_LISTEN')])
-    except (Exception,):
-        raise RuntimeError('Failed to run pproxy')
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+    
+    if start_params:
+        print(f'PProxy started! (using params: {" ".join(start_params)})')
+    else:
+        print('PProxy started!')
+
+    while proc.poll() is None:
+        line = proc.stdout.readline()
+        if line:
+            print(line.decode('utf-8').strip())
+    
+    if proc.returncode != 0:
+        raise RuntimeError('Failed to run PProxy')
     
 
 def main():
