@@ -76,17 +76,6 @@ list (from `protonvpn init`):
 3) Visionary
 ```
 
-### `PVPN_KILLSWITCH`
-
-Enable or not the killswitch.
-
-```
-0) Disabled
-1) Enabled
-```
-
-Default: `1`
-
 ### `PVPN_ARGS`
 
 Any arguments you want to pass to `protonvpn connect`. For example, if you want
